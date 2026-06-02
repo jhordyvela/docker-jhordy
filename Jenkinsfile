@@ -74,7 +74,7 @@ pipeline {
             }
         }
 
-        // 📊 Versión Corregida con Recursividad Completa para Indexar Archivos
+       // 📊 Etapa 7: Análisis de SonarQube con escaneo recursivo dinámico
         stage('SonarQube Analysis') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
@@ -87,10 +87,8 @@ pipeline {
                         sonarsource/sonar-scanner-cli \
                         -Dsonar.projectKey=minimarket-ecommerce \
                         -Dsonar.projectName=minimarket-ecommerce \
-                        -Dsonar.sources=/usr/src \
+                        -Dsonar.sources=. \
                         -Dsonar.exclusions=**/node_modules/**,**/coverage/**,**/dist/** \
-                        -Dsonar.tests=/usr/src \
-                        -Dsonar.test.inclusions=**/test/**/*.test.js,**/test/**/*.spec.js \
                         -Dsonar.javascript.lcov.reportPaths=**/coverage/lcov.info \
                         -Dsonar.host.url=http://docker.sonar:9000 \
                         -Dsonar.login=${SONAR_AUTH}
