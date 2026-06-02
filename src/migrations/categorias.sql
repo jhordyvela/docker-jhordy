@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS categorias (
+  id SERIAL PRIMARY KEY,
+  nombre VARCHAR(120) NOT NULL UNIQUE,
+  slug VARCHAR(140) NOT NULL UNIQUE,
+  descripcion TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);

@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS pedidos (
+  id SERIAL PRIMARY KEY,
+  cliente_id INT NOT NULL REFERENCES clientes(id),
+  estado TEXT DEFAULT 'PENDIENTE',
+  total NUMERIC(10,2) DEFAULT 0,
+  creado_en TIMESTAMPTZ DEFAULT now()
+);

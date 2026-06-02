@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: minimarket
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Jmvela2005
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  backend:
+    build: ../  # apunta a la raíz del backend (db-backend)
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: minimarket
+      DB_USER: postgres
+      DB_PASSWORD: Jmvela2005
+      DB_SSL: 'false'
+      GC_BUCKET: test-bucket
+      JWT_SECRET: ${JWT_SECRET:-b7f3e6c9d4a1f8e2b6c3d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-3002}:3000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
