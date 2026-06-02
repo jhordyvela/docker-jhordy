@@ -11,7 +11,7 @@ pipeline {
     environment {
         PROJECT_NAME = 'minimarket-ecommerce'
         COMPOSE_FILE = 'docker/docker-compose.yml'
-        REPO_URL     = 'https://github.com/jhordyvela/docker-2.git'
+        REPO_URL     = 'https://github.com/jhordyvela/docker-jhordy.git'
         
         // Tu token activo de SonarQube
         SONAR_AUTH   = 'squ_3c882d37e6dbbf08024ffe2092e2f903520d4c34'
