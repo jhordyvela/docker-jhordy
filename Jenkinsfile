@@ -74,7 +74,7 @@ pipeline {
             }
         }
 
-        // 📊 Etapa 7: Análisis de SonarQube indexando archivos Node.js y Cobertura
+        // 📊 Versión Corregida con Recursividad Completa para Indexar Archivos
         stage('SonarQube Analysis') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
@@ -87,13 +87,13 @@ pipeline {
                         sonarsource/sonar-scanner-cli \
                         -Dsonar.projectKey=minimarket-ecommerce \
                         -Dsonar.projectName=minimarket-ecommerce \
-                        -Dsonar.sources=. \
-                        -Dsonar.exclusions=node_modules/**,coverage/**,dist/** \
-                        -Dsonar.tests=. \
-                        -Dsonar.test.inclusions=test/**/*.test.js,test/**/*.spec.js \
-                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                        -Dsonar.sources=/usr/src \
+                        -Dsonar.exclusions=**/node_modules/**,**/coverage/**,**/dist/** \
+                        -Dsonar.tests=/usr/src \
+                        -Dsonar.test.inclusions=**/test/**/*.test.js,**/test/**/*.spec.js \
+                        -Dsonar.javascript.lcov.reportPaths=**/coverage/lcov.info \
                         -Dsonar.host.url=http://docker.sonar:9000 \
-                        -Dsonar.login=squ_3c882d37e6dbbf08024ffe2092e2f903520d4c34
+                        -Dsonar.login=${SONAR_AUTH}
                     """
                 }
             }
