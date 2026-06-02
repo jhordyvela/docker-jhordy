@@ -70,6 +70,8 @@ pipeline {
                 timeout(time: 10, unit: 'MINUTES') {
                     echo '🧪 === EJECUTANDO PRUEBAS UNITARIAS Y COBERTURA ==='
                     sh "docker compose -p ${PROJECT_NAME} -f ${COMPOSE_FILE} exec -T backend sh -c 'npm install && npm run test:coverage'"
+                    // Copiar el reporte de cobertura generado dentro del contenedor al workspace de Jenkins
+                    sh "docker compose -p ${PROJECT_NAME} -f ${COMPOSE_FILE} cp backend:/usr/src/app/coverage ./coverage || true"
                 }
             }
         }
@@ -83,7 +85,8 @@ pipeline {
                     docker run --rm \
                         -u root \
                         --network=docker_default \
-                        -v "${WORKSPACE}:/usr/src" \
+                        --volumes-from \$(hostname) \
+                        -w "${WORKSPACE}" \
                         sonarsource/sonar-scanner-cli \
                         -Dsonar.projectKey=minimarket-ecommerce \
                         -Dsonar.projectName=minimarket-ecommerce \
