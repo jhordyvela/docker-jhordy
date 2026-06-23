@@ -22,7 +22,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. SONAR
+      # 2. SONAR (OK)
       - name: SonarQube Analysis
         shell: cmd
         run: |
@@ -40,7 +40,7 @@ jobs:
           cd docker
           docker-compose -p %DOCKER_PROJECT_NAME% down -v --remove-orphans
 
-      # 4. Build + start containers
+      # 4. Build + start
       - name: Build and start
         shell: cmd
         run: |
@@ -52,11 +52,11 @@ jobs:
         shell: powershell
         run: Start-Sleep -Seconds 30
 
-      # 6. Init DB PostgreSQL
+      # 6. INIT DB (FIX REAL)
       - name: Init DB
         shell: cmd
         run: |
-          type sql\init.sql | docker exec -i %DB_CONTAINER_NAME% psql -U postgres -d %DB_NAME%
+          docker exec -i %DB_CONTAINER_NAME% psql -U postgres -d postgres < "%GITHUB_WORKSPACE%\sql\init.sql"
 
       # 7. Estado final
       - name: Show status
