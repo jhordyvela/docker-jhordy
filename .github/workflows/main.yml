@@ -17,10 +17,12 @@ jobs:
     runs-on: self-hosted
 
     steps:
+
+      # 1. Código
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 🔥 SOLO SONAR (sin Maven)
+      # 2. SONAR (correcto para CLI en Windows)
       - name: SonarQube Analysis
         shell: cmd
         run: |
@@ -28,31 +30,37 @@ jobs:
           -Dsonar.projectKey=ecommerce_git_action ^
           -Dsonar.sources=. ^
           -Dsonar.host.url=http://localhost:9000 ^
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} ^
+          -Dsonar.sourceEncoding=UTF-8
 
-      # Docker deploy
+      # 3. Stop containers
       - name: Stop containers
         shell: cmd
         run: |
           cd docker
           docker-compose -p %DOCKER_PROJECT_NAME% down -v --remove-orphans
 
+      # 4. Build + start containers
       - name: Build and start
         shell: cmd
         run: |
           cd docker
           docker-compose -p %DOCKER_PROJECT_NAME% up -d --build
 
+      # 5. Esperar DB (IMPORTANTE usar PowerShell en Windows runner)
       - name: Wait DB
         shell: powershell
         run: Start-Sleep -Seconds 30
 
+      # 6. Init DB PostgreSQL (CORREGIDO)
       - name: Init DB
         shell: cmd
         run: |
-          type sql\init.sql | docker exec -i %DB_CONTAINER_NAME% psql -U postgres -d postgres
+          type sql\init.sql | docker exec -i %DB_CONTAINER_NAME% psql -U postgres -d %DB_NAME%
 
+      # 7. Estado final
       - name: Show status
         shell: cmd
         run: |
           docker ps
+          docker logs --tail 50 %APP_CONTAINER_NAME%
