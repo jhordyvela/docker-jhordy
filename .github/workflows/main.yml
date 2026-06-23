@@ -40,7 +40,7 @@ jobs:
       - name: Init DB (PostgreSQL)
         shell: cmd
         run: |
-          type ..\sql\init.sql | docker exec -i %DB_CONTAINER_NAME% psql -U postgres %DB_NAME%
+          type sql\init.sql | docker exec -i %DB_CONTAINER_NAME% psql -U postgres -d postgres
 
       - name: Show status
         shell: cmd
