@@ -14,56 +14,45 @@ env:
 jobs:
 
   build-and-deploy:
-    name: CI/CD Full Pipeline
     runs-on: self-hosted
 
     steps:
-      # 1. Código
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Build Maven (si es Java)
-      - name: Build project
-        shell: cmd
-        run: mvn clean package -DskipTests
-
-      # 3. SONARQUBE (IMPORTANTE)
+      # 🔥 SOLO SONAR (sin Maven)
       - name: SonarQube Analysis
         shell: cmd
         run: |
-          mvn sonar:sonar ^
+          sonar-scanner ^
           -Dsonar.projectKey=ecommerce_git_action ^
+          -Dsonar.sources=. ^
           -Dsonar.host.url=http://localhost:9000 ^
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      # 4. Stop containers
-      - name: Stop old containers
+      # Docker deploy
+      - name: Stop containers
         shell: cmd
         run: |
           cd docker
           docker-compose -p %DOCKER_PROJECT_NAME% down -v --remove-orphans
 
-      # 5. Start containers
-      - name: Build and start containers
+      - name: Build and start
         shell: cmd
         run: |
           cd docker
           docker-compose -p %DOCKER_PROJECT_NAME% up -d --build
 
-      # 6. Esperar DB
       - name: Wait DB
         shell: powershell
         run: Start-Sleep -Seconds 30
 
-      # 7. Init DB (Postgres)
       - name: Init DB
         shell: cmd
         run: |
           type sql\init.sql | docker exec -i %DB_CONTAINER_NAME% psql -U postgres -d postgres
 
-      # 8. Ver estado
       - name: Show status
         shell: cmd
         run: |
           docker ps
-          docker logs --tail 50 %APP_CONTAINER_NAME%
