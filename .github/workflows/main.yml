@@ -7,11 +7,9 @@ on:
 
 env:
   DOCKER_PROJECT_NAME: 'ecombackend'
-  APP_CONTAINER_NAME: 'product_app'
-  DB_CONTAINER_NAME: 'mysql-ecommerce-prod'
+  APP_CONTAINER_NAME: 'ecombackend-backend-1'
+  DB_CONTAINER_NAME: 'ecombackend-db-1'
   DB_NAME: 'ecommerce_backend_prod'
-  DB_USER: 'root'
-  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
 jobs:
 
@@ -39,10 +37,10 @@ jobs:
         shell: powershell
         run: Start-Sleep -Seconds 30
 
-      - name: Init DB
+      - name: Init DB (PostgreSQL)
         shell: cmd
         run: |
-          type ..\sql\init.sql | docker exec -i %DB_CONTAINER_NAME% mysql -u%DB_USER% -p%DB_PASSWORD% %DB_NAME%
+          type ..\sql\init.sql | docker exec -i %DB_CONTAINER_NAME% psql -U postgres %DB_NAME%
 
       - name: Show status
         shell: cmd
