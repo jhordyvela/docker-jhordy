@@ -22,11 +22,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. SONAR (correcto para CLI en Windows)
+      # 2. SONAR
       - name: SonarQube Analysis
         shell: cmd
         run: |
-          sonar-scanner ^
+          C:\sonar-scanner\bin\sonar-scanner.bat ^
           -Dsonar.projectKey=ecommerce_git_action ^
           -Dsonar.sources=. ^
           -Dsonar.host.url=http://localhost:9000 ^
@@ -47,12 +47,12 @@ jobs:
           cd docker
           docker-compose -p %DOCKER_PROJECT_NAME% up -d --build
 
-      # 5. Esperar DB (IMPORTANTE usar PowerShell en Windows runner)
+      # 5. Esperar DB
       - name: Wait DB
         shell: powershell
         run: Start-Sleep -Seconds 30
 
-      # 6. Init DB PostgreSQL (CORREGIDO)
+      # 6. Init DB PostgreSQL
       - name: Init DB
         shell: cmd
         run: |
