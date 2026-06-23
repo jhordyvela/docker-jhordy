@@ -36,8 +36,8 @@ jobs:
           docker-compose -p %DOCKER_PROJECT_NAME% up -d --build
 
       - name: Wait DB
-        shell: cmd
-        run: timeout /t 30 /nobreak
+        shell: powershell
+        run: Start-Sleep -Seconds 30
 
       - name: Init DB
         shell: cmd
