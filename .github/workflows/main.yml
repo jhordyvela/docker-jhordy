@@ -38,7 +38,7 @@ jobs:
             exit 1
           fi
 
-          sonar-scanner \
+          /opt/sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=node-project \
             -Dsonar.projectName=node-project \
             -Dsonar.sources=. \
