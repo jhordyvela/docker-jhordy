@@ -1,58 +1,70 @@
 name: CI/CD - Docker Deploy
 
 on:
-  push:
-    branches: ["master"]
-  workflow_dispatch:
+push:
+branches:
+- master
+workflow_dispatch:
 
 env:
-  DOCKER_PROJECT_NAME: "docker"
-  APP_CONTAINER_NAME: "docker-backend-1"
-  DB_CONTAINER_NAME: "docker-db-1"
+DOCKER_PROJECT_NAME: docker
+APP_CONTAINER_NAME: docker-backend-1
+DB_CONTAINER_NAME: docker-db-1
 
 jobs:
-  build-and-deploy:
-    runs-on: self-hosted
+build-and-deploy:
+runs-on: self-hosted
 
-    steps:
+```
+steps:
+  # 1. Descargar código
+  - name: Checkout repository
+    uses: actions/checkout@v4
 
-      # 1. Checkout repo
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # 2. Verificar Sonar Scanner
+  - name: Verify Sonar Scanner
+    run: |
+      whoami
+      pwd
+      ls -l /opt/sonar-scanner/bin
+      /opt/sonar-scanner/bin/sonar-scanner --version
 
-      # 2. SonarCloud Analysis
-      - name: SonarCloud Analysis
-        run: |
-          sonar-scanner \
-          -Dsonar.organization=github-jhordyvela \
-          -Dsonar.projectKey=docker-jhordy \
-          -Dsonar.sources=. \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+  # 3. Análisis SonarCloud
+  - name: SonarCloud Analysis
+    run: |
+      /opt/sonar-scanner/bin/sonar-scanner \
+        -Dsonar.organization=github-jhordyvela \
+        -Dsonar.projectKey=docker-jhordy \
+        -Dsonar.sources=. \
+        -Dsonar.host.url=https://sonarcloud.io \
+        -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
-      # 3. Stop containers
-      - name: Stop containers
-        run: |
-          cd docker
-          docker-compose -p $DOCKER_PROJECT_NAME down -v --remove-orphans
+  # 4. Detener contenedores existentes
+  - name: Stop containers
+    run: |
+      cd docker
+      docker compose down -v --remove-orphans
 
-      # 4. Build and start
-      - name: Build and start
-        run: |
-          cd docker
-          docker-compose -p $DOCKER_PROJECT_NAME up -d --build
+  # 5. Construir y levantar contenedores
+  - name: Build and start
+    run: |
+      cd docker
+      docker compose up -d --build
 
-      # 5. Wait DB (importante para Postgres)
-      - name: Wait DB
-        run: sleep 30
+  # 6. Esperar a PostgreSQL
+  - name: Wait DB
+    run: sleep 30
 
-      # 6. Init DB
-      - name: Init DB
-        run: |
-          docker exec -i $DB_CONTAINER_NAME psql -U postgres -d postgres < $GITHUB_WORKSPACE/sql/init.sql
+  # 7. Inicializar base de datos
+  - name: Init DB
+    run: |
+      docker exec -i $DB_CONTAINER_NAME \
+        psql -U postgres -d postgres \
+        < $GITHUB_WORKSPACE/sql/init.sql
 
-      # 7. Show status
-      - name: Show status
-        run: |
-          docker ps
-          docker logs --tail 50 $APP_CONTAINER_NAME
+  # 8. Mostrar estado
+  - name: Show status
+    run: |
+      docker ps
+      docker logs --tail 50 $APP_CONTAINER_NAME
+```
