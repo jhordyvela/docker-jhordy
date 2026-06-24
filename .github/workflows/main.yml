@@ -16,41 +16,42 @@ jobs:
 
     steps:
 
+      # 1. Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # SONARCLOUD
+      # 2. SonarCloud Analysis
       - name: SonarCloud Analysis
         run: |
           sonar-scanner \
-          -Dsonar.projectKey=ecommerce_git_action \
-          -Dsonar.organization=TU_ORG \
+          -Dsonar.organization=github-jhordyvela \
+          -Dsonar.projectKey=docker-jhordy \
           -Dsonar.sources=. \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      # STOP CONTAINERS
+      # 3. Stop containers
       - name: Stop containers
         run: |
           cd docker
           docker-compose -p $DOCKER_PROJECT_NAME down -v --remove-orphans
 
-      # BUILD + START
+      # 4. Build and start
       - name: Build and start
         run: |
           cd docker
           docker-compose -p $DOCKER_PROJECT_NAME up -d --build
 
-      # WAIT DB
+      # 5. Wait DB
       - name: Wait DB
         run: sleep 30
 
-      # INIT DB
+      # 6. Init DB
       - name: Init DB
         run: |
           cat $GITHUB_WORKSPACE/sql/init.sql | docker exec -i $DB_CONTAINER_NAME psql -U postgres -d postgres
 
-      # STATUS
+      # 7. Show status
       - name: Show status
         run: |
           docker ps
