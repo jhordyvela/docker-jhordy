@@ -1,89 +1,59 @@
-name: CI/CD - Docker Deploy
+name: CI/CD - Node + SonarQube + Docker
 
 on:
   push:
-    branches:
-      - master
+    branches: [ "master" ]
   workflow_dispatch:
 
 env:
-  DOCKER_PROJECT_NAME: docker
-  APP_CONTAINER_NAME: docker-backend-1
-  DB_CONTAINER_NAME: docker-db-1
+  APP_CONTAINER_NAME: node-app
+  DB_CONTAINER_NAME: node-db
 
 jobs:
-  build-and-deploy:
+
+  sonar-analysis:
     runs-on: self-hosted
 
     steps:
-      # 1. Checkout
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Verificar entorno
-      - name: Verify environment
-        run: |
-          whoami
-          pwd
-          echo "PATH=$PATH"
-          ls -l /opt/sonar-scanner/bin || true
-          /opt/sonar-scanner/bin/sonar-scanner --version || true
+      # 🔥 instalar node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
-      # 3. Esperar SonarQube
-      - name: Wait for SonarQube
-        run: |
-          echo "Waiting for SonarQube..."
+      - name: Install dependencies
+        run: npm install
 
-          for i in {1..60}; do
-            STATUS=$(curl -s http://localhost:9000/api/system/status || true)
-            echo "Status: $STATUS"
-
-            if echo "$STATUS" | grep -q '"status":"UP"'; then
-              echo "SonarQube is UP"
-              exit 0
-            fi
-
-            sleep 10
-          done
-
-          echo "SonarQube not ready"
-          exit 1
-
-      # 4. SonarQube Analysis (FIX REAL)
+      # 🔥 SonarQube scan
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          echo "TOKEN LENGTH: ${#SONAR_TOKEN}"
+
           /opt/sonar-scanner/bin/sonar-scanner \
-            -Dsonar.projectKey=docker-jhordy \
+            -Dsonar.projectKey=node-project \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.token=$SONAR_TOKEN
 
-      # 5. Stop containers
-      - name: Stop containers
-        run: |
-          cd docker
-          docker compose down -v --remove-orphans
+  build-and-deploy:
+    runs-on: self-hosted
+    needs: sonar-analysis
 
-      # 6. Build and start
-      - name: Build and start
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and run Docker
         run: |
-          cd docker
+          docker compose down -v
           docker compose up -d --build
 
-      # 7. Wait DB
-      - name: Wait DB
-        run: sleep 30
-
-      # 8. Init DB
-      - name: Init DB
-        run: |
-          docker exec -i $DB_CONTAINER_NAME \
-          psql -U postgres -d postgres < $GITHUB_WORKSPACE/sql/init.sql
-
-      # 9. Show status
-      - name: Show status
+      - name: Show logs
         run: |
           docker ps
           docker logs --tail 50 $APP_CONTAINER_NAME
