@@ -9,8 +9,8 @@ env:
   APP_CONTAINER_NAME: node-app
   DB_CONTAINER_NAME: node-db
 
-  # 🔥 CAMBIO IMPORTANTE
-  SONAR_HOST_URL: http://54.242.40.43:9000
+  # ✔ IP CORRECTA (Elastic IP actual)
+  SONAR_HOST_URL: http://3.229.179.235:9000
 
 jobs:
 
