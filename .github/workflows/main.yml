@@ -18,7 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 🔥 instalar node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -27,18 +26,23 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 🔥 SonarQube scan
+      # 🔥 FIX REAL AQUÍ
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           echo "TOKEN LENGTH: ${#SONAR_TOKEN}"
 
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo "ERROR: SONAR_TOKEN is empty"
+            exit 1
+          fi
+
           /opt/sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=node-project \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.token=$SONAR_TOKEN
+            -Dsonar.login=$SONAR_TOKEN
 
   build-and-deploy:
     runs-on: self-hosted
