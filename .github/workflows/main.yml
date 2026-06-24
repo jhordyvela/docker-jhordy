@@ -6,61 +6,53 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKER_PROJECT_NAME: 'ecombackend'
-  APP_CONTAINER_NAME: 'ecombackend-backend-1'
-  DB_CONTAINER_NAME: 'ecombackend-db-1'
-  DB_NAME: 'ecommerce_backend_prod'
+  DOCKER_PROJECT_NAME: "ecombackend"
+  APP_CONTAINER_NAME: "ecombackend-backend-1"
+  DB_CONTAINER_NAME: "ecombackend-db-1"
+  DB_NAME: "ecommerce_backend_prod"
 
 jobs:
-
   build-and-deploy:
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
 
     steps:
 
-      # 1. Código
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. SONAR
+      # SONAR (LINUX)
       - name: SonarQube Analysis
-        shell: cmd
         run: |
-          C:\sonar-scanner\bin\sonar-scanner.bat ^
-          -Dsonar.projectKey=ecommerce_git_action ^
-          -Dsonar.sources=. ^
-          -Dsonar.host.url=http://localhost:9000 ^
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }} ^
+          sonar-scanner \
+          -Dsonar.projectKey=ecommerce_git_action \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=http://localhost:9000 \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.sourceEncoding=UTF-8
 
-      # 3. Stop containers
+      # STOP CONTAINERS
       - name: Stop containers
-        shell: cmd
         run: |
           cd docker
-          docker-compose -p %DOCKER_PROJECT_NAME% down -v --remove-orphans
+          docker-compose -p $DOCKER_PROJECT_NAME down -v --remove-orphans
 
-      # 4. Build + start
+      # BUILD + START
       - name: Build and start
-        shell: cmd
         run: |
           cd docker
-          docker-compose -p %DOCKER_PROJECT_NAME% up -d --build
+          docker-compose -p $DOCKER_PROJECT_NAME up -d --build
 
-      # 5. Esperar DB
+      # WAIT DB
       - name: Wait DB
-        shell: powershell
-        run: Start-Sleep -Seconds 30
+        run: sleep 30
 
-      # 6. INIT DB (CORREGIDO Y ESTABLE)
+      # INIT DB
       - name: Init DB
-        shell: cmd
         run: |
-          type "%GITHUB_WORKSPACE%\sql\init.sql" | docker exec -i %DB_CONTAINER_NAME% psql -U postgres -d postgres
+          cat $GITHUB_WORKSPACE/sql/init.sql | docker exec -i $DB_CONTAINER_NAME psql -U postgres -d postgres
 
-      # 7. Estado final
+      # STATUS
       - name: Show status
-        shell: cmd
         run: |
           docker ps
-          docker logs --tail 50 %APP_CONTAINER_NAME%
+          docker logs --tail 50 $APP_CONTAINER_NAME
