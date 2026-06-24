@@ -31,8 +31,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           /opt/sonar-scanner/bin/sonar-scanner \
-            -Dsonar.organization=github-jhordyvela \
-            -Dsonar.projectKey=docker-jhordy \
+            -X \
+            -Dsonar.organization=jhordyvela \
+            -Dsonar.projectKey=jhordyvela_docker-jhordy \
             -Dsonar.sources=. \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=$SONAR_TOKEN
