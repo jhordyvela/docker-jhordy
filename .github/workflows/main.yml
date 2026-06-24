@@ -2,12 +2,13 @@ name: CI/CD - Node + SonarQube + Docker
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   workflow_dispatch:
 
 env:
   APP_CONTAINER_NAME: node-app
   DB_CONTAINER_NAME: node-db
+  SONAR_HOST_URL: http://98.86.128.118:9000
 
 jobs:
 
@@ -15,10 +16,10 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -26,7 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # SONAR FIX REAL
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -40,24 +40,32 @@ jobs:
 
           /opt/sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=node-project \
+            -Dsonar.projectName=node-project \
             -Dsonar.sources=. \
-            -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.token=$SONAR_TOKEN
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.token=$SONAR_TOKEN \
+            -Dsonar.login=$SONAR_TOKEN
 
   build-and-deploy:
     runs-on: self-hosted
     needs: sonar-analysis
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build and run Docker
+      - name: Stop old containers
         run: |
-          docker compose down -v
+          cd $GITHUB_WORKSPACE
+          docker compose down -v || true
+
+      - name: Build and start containers
+        run: |
+          cd $GITHUB_WORKSPACE
           docker compose up -d --build
 
-      - name: Show logs
-        run: |
-          docker ps
-          docker logs --tail 50 $APP_CONTAINER_NAME
+      - name: Show running containers
+        run: docker ps
+
+      - name: Show backend logs
+        run: docker logs --tail 50 $APP_CONTAINER_NAME || true
