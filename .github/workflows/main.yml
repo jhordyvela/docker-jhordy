@@ -19,15 +19,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # SONAR
-      - name: SonarQube Analysis
+      # SONARCLOUD
+      - name: SonarCloud Analysis
         run: |
           sonar-scanner \
           -Dsonar.projectKey=ecommerce_git_action \
+          -Dsonar.organization=TU_ORG \
           -Dsonar.sources=. \
-          -Dsonar.host.url=http://localhost:9000 \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-          -Dsonar.sourceEncoding=UTF-8
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       # STOP CONTAINERS
       - name: Stop containers
