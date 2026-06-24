@@ -8,7 +8,7 @@ on:
 env:
   APP_CONTAINER_NAME: node-app
   DB_CONTAINER_NAME: node-db
-  SONAR_HOST_URL: http://localhost:9000   # ✔ OK si Sonar está en el mismo EC2
+  SONAR_HOST_URL: http://localhost:9000
 
 jobs:
 
@@ -38,7 +38,7 @@ jobs:
             exit 1
           fi
 
-          /opt/sonar-scanner/bin/sonar-scanner \
+          sonar-scanner \
             -Dsonar.projectKey=node-project \
             -Dsonar.projectName=node-project \
             -Dsonar.sources=. \
