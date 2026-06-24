@@ -8,7 +8,9 @@ on:
 env:
   APP_CONTAINER_NAME: node-app
   DB_CONTAINER_NAME: node-db
-  SONAR_HOST_URL: http://localhost:9000
+
+  # 🔥 CAMBIO IMPORTANTE
+  SONAR_HOST_URL: http://54.242.40.43:9000
 
 jobs:
 
