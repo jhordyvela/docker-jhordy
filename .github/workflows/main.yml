@@ -17,11 +17,9 @@ runs-on: self-hosted
 
 ```
 steps:
-  # 1. Descargar código
   - name: Checkout repository
     uses: actions/checkout@v4
 
-  # 2. Verificar Sonar Scanner
   - name: Verify Sonar Scanner
     run: |
       whoami
@@ -29,7 +27,6 @@ steps:
       ls -l /opt/sonar-scanner/bin
       /opt/sonar-scanner/bin/sonar-scanner --version
 
-  # 3. Análisis SonarCloud
   - name: SonarCloud Analysis
     run: |
       /opt/sonar-scanner/bin/sonar-scanner \
@@ -39,30 +36,23 @@ steps:
         -Dsonar.host.url=https://sonarcloud.io \
         -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
-  # 4. Detener contenedores existentes
   - name: Stop containers
     run: |
       cd docker
       docker compose down -v --remove-orphans
 
-  # 5. Construir y levantar contenedores
   - name: Build and start
     run: |
       cd docker
       docker compose up -d --build
 
-  # 6. Esperar a PostgreSQL
   - name: Wait DB
     run: sleep 30
 
-  # 7. Inicializar base de datos
   - name: Init DB
     run: |
-      docker exec -i $DB_CONTAINER_NAME \
-        psql -U postgres -d postgres \
-        < $GITHUB_WORKSPACE/sql/init.sql
+      docker exec -i $DB_CONTAINER_NAME psql -U postgres -d postgres < $GITHUB_WORKSPACE/sql/init.sql
 
-  # 8. Mostrar estado
   - name: Show status
     run: |
       docker ps
