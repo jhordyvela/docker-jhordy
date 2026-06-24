@@ -2,14 +2,13 @@ name: CI/CD - Docker Deploy
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   workflow_dispatch:
 
 env:
   DOCKER_PROJECT_NAME: "ecombackend"
   APP_CONTAINER_NAME: "ecombackend-backend-1"
   DB_CONTAINER_NAME: "ecombackend-db-1"
-  DB_NAME: "ecommerce_backend_prod"
 
 jobs:
   build-and-deploy:
@@ -20,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # SONAR (LINUX)
+      # SONAR
       - name: SonarQube Analysis
         run: |
           sonar-scanner \
