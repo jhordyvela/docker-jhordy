@@ -20,19 +20,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Verificar entorno (SIN sonar-scanner directo)
+      # 2. Verificar entorno
       - name: Verify environment
         run: |
           whoami
           pwd
           echo "PATH=$PATH"
           ls -l /opt/sonar-scanner/bin || true
-          /opt/sonar-scanner/bin/sonar-scanner --version
+          /opt/sonar-scanner/bin/sonar-scanner --version || true
 
       # 3. Esperar SonarQube
       - name: Wait for SonarQube
         run: |
           echo "Waiting for SonarQube..."
+
           for i in {1..60}; do
             STATUS=$(curl -s http://localhost:9000/api/system/status || true)
             echo "Status: $STATUS"
@@ -48,7 +49,7 @@ jobs:
           echo "SonarQube not ready"
           exit 1
 
-      # 4. SonarQube Analysis (FIX REAL)
+      # 4. SonarQube Analysis
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -57,7 +58,7 @@ jobs:
             -Dsonar.projectKey=docker-jhordy \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.token=$SONAR_TOKEN
+            -Dsonar.login=$SONAR_TOKEN
 
       # 5. Stop containers
       - name: Stop containers
