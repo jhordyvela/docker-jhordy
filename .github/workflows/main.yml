@@ -26,28 +26,13 @@ jobs:
           ls -l /opt/sonar-scanner/bin
           /opt/sonar-scanner/bin/sonar-scanner --version
 
-      - name: Debug Sonar Credentials
+      - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          if [ -z "$SONAR_TOKEN" ]; then
-            echo "WARNING: SONAR_TOKEN is completely empty! Please check your GitHub repository secrets."
-          else
-            echo "SONAR_TOKEN is injected."
-            echo "Length: ${#SONAR_TOKEN} characters"
-            echo "Prefix: ${SONAR_TOKEN:0:4}..."
-          fi
-
-      - name: SonarCloud Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           /opt/sonar-scanner/bin/sonar-scanner \
-            -X \
-            -Dsonar.organization=jhordyvela \
-            -Dsonar.projectKey=jhordyvela_docker-jhordy \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.host.url=${SONAR_HOST_URL:-http://localhost:9000} \
             -Dsonar.token=$SONAR_TOKEN
 
       - name: Stop containers
