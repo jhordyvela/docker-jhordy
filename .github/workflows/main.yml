@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 🔥 FIX REAL AQUÍ
+      # SONAR FIX REAL
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -42,7 +42,7 @@ jobs:
             -Dsonar.projectKey=node-project \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.token=$SONAR_TOKEN
 
   build-and-deploy:
     runs-on: self-hosted
