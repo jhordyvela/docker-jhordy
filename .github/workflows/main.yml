@@ -28,13 +28,15 @@ steps:
       /opt/sonar-scanner/bin/sonar-scanner --version
 
   - name: SonarCloud Analysis
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     run: |
       /opt/sonar-scanner/bin/sonar-scanner \
         -Dsonar.organization=github-jhordyvela \
         -Dsonar.projectKey=docker-jhordy \
         -Dsonar.sources=. \
         -Dsonar.host.url=https://sonarcloud.io \
-        -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+        -Dsonar.token=$SONAR_TOKEN
 
   - name: Stop containers
     run: |
