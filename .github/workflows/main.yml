@@ -1,62 +1,60 @@
 name: CI/CD - Docker Deploy
 
 on:
-push:
-branches:
-- master
-workflow_dispatch:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
 
 env:
-DOCKER_PROJECT_NAME: docker
-APP_CONTAINER_NAME: docker-backend-1
-DB_CONTAINER_NAME: docker-db-1
+  DOCKER_PROJECT_NAME: docker
+  APP_CONTAINER_NAME: docker-backend-1
+  DB_CONTAINER_NAME: docker-db-1
 
 jobs:
-build-and-deploy:
-runs-on: self-hosted
+  build-and-deploy:
+    runs-on: self-hosted
 
-```
-steps:
-  - name: Checkout repository
-    uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  - name: Verify Sonar Scanner
-    run: |
-      whoami
-      pwd
-      ls -l /opt/sonar-scanner/bin
-      /opt/sonar-scanner/bin/sonar-scanner --version
+      - name: Verify Sonar Scanner
+        run: |
+          whoami
+          pwd
+          ls -l /opt/sonar-scanner/bin
+          /opt/sonar-scanner/bin/sonar-scanner --version
 
-  - name: SonarCloud Analysis
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    run: |
-      /opt/sonar-scanner/bin/sonar-scanner \
-        -Dsonar.organization=github-jhordyvela \
-        -Dsonar.projectKey=docker-jhordy \
-        -Dsonar.sources=. \
-        -Dsonar.host.url=https://sonarcloud.io \
-        -Dsonar.token=$SONAR_TOKEN
+      - name: SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          /opt/sonar-scanner/bin/sonar-scanner \
+            -Dsonar.organization=github-jhordyvela \
+            -Dsonar.projectKey=docker-jhordy \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=$SONAR_TOKEN
 
-  - name: Stop containers
-    run: |
-      cd docker
-      docker compose down -v --remove-orphans
+      - name: Stop containers
+        run: |
+          cd docker
+          docker compose down -v --remove-orphans
 
-  - name: Build and start
-    run: |
-      cd docker
-      docker compose up -d --build
+      - name: Build and start
+        run: |
+          cd docker
+          docker compose up -d --build
 
-  - name: Wait DB
-    run: sleep 30
+      - name: Wait DB
+        run: sleep 30
 
-  - name: Init DB
-    run: |
-      docker exec -i $DB_CONTAINER_NAME psql -U postgres -d postgres < $GITHUB_WORKSPACE/sql/init.sql
+      - name: Init DB
+        run: |
+          docker exec -i $DB_CONTAINER_NAME psql -U postgres -d postgres < $GITHUB_WORKSPACE/sql/init.sql
 
-  - name: Show status
-    run: |
-      docker ps
-      docker logs --tail 50 $APP_CONTAINER_NAME
-```
+      - name: Show status
+        run: |
+          docker ps
+          docker logs --tail 50 $APP_CONTAINER_NAME
