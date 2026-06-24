@@ -49,7 +49,7 @@ jobs:
           echo "SonarQube not ready"
           exit 1
 
-      # 4. SonarQube Analysis
+      # 4. SonarQube Analysis (FIX REAL)
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -58,7 +58,7 @@ jobs:
             -Dsonar.projectKey=docker-jhordy \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.token=$SONAR_TOKEN
 
       # 5. Stop containers
       - name: Stop containers
