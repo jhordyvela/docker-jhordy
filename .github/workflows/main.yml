@@ -28,7 +28,7 @@ jobs:
         run: npm ci || npm install
 
       - name: Verify Sonar Scanner
-        run: sonar-scanner --version
+        run: /opt/sonar-scanner/bin/sonar-scanner --version
 
       - name: SonarQube Analysis
         env:
@@ -39,7 +39,7 @@ jobs:
             exit 1
           fi
 
-          sonar-scanner \
+          /opt/sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=node-project \
             -Dsonar.projectName=node-project \
             -Dsonar.sources=. \
