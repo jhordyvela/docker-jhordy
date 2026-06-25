@@ -8,8 +8,6 @@ on:
 env:
   APP_CONTAINER_NAME: node-app
   DB_CONTAINER_NAME: node-db
-
-  # ✔ IP CORRECTA (Elastic IP actual)
   SONAR_HOST_URL: http://3.229.179.235:9000
 
 jobs:
@@ -33,14 +31,12 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          echo "TOKEN LENGTH: ${#SONAR_TOKEN}"
-
           if [ -z "$SONAR_TOKEN" ]; then
             echo "ERROR: SONAR_TOKEN is empty"
             exit 1
           fi
 
-          /opt/sonar-scanner/bin/sonar-scanner \
+          sonar-scanner \
             -Dsonar.projectKey=node-project \
             -Dsonar.projectName=node-project \
             -Dsonar.sources=. \
@@ -57,11 +53,14 @@ jobs:
 
       - name: Stop old containers
         run: |
-          docker compose down -v || true
+          docker compose down || true
 
       - name: Build and start containers
         run: |
           docker compose up -d --build
+
+      - name: Wait for containers
+        run: sleep 10
 
       - name: Show running containers
         run: docker ps
