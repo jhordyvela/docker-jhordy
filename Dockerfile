@@ -5,11 +5,15 @@ WORKDIR /usr/src/app
 # Copiar dependencias
 COPY package*.json ./
 RUN npm install --production
+
 # Instalar sonar-scanner globalmente
 RUN npm install -g sonar-scanner
 
-# Copiar todo el backend
+# Copiar código backend
 COPY . .
+
+# 🔥 ASEGURAR HTML PUBLICO
+COPY public ./public
 
 # Variables de entorno
 ENV PORT=3000
@@ -23,5 +27,4 @@ ENV GC_BUCKET=test-bucket
 
 EXPOSE 3000
 
-# Ejecutar index.js dentro de src
 CMD ["node", "src/index.js"]
