@@ -8,7 +8,7 @@ on:
 env:
   APP_CONTAINER_NAME: node-app
   DB_CONTAINER_NAME: node-db
-  SONAR_HOST_URL: http://3.229.179.235:9000
+  SONAR_HOST_URL: http://localhost:9000
 
 jobs:
 
@@ -27,6 +27,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Verify Sonar Scanner
+        run: |
+          /opt/sonar-scanner/bin/sonar-scanner --version
+
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -36,12 +40,12 @@ jobs:
             exit 1
           fi
 
-          sonar-scanner \
+          /opt/sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=node-project \
             -Dsonar.projectName=node-project \
             -Dsonar.sources=. \
             -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.token=$SONAR_TOKEN
 
   build-and-deploy:
     runs-on: self-hosted
